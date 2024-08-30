@@ -1,0 +1,252 @@
+SELECT * FROM club_membership;
+
+select *from clubs_organization;
+
+select * from courses;
+
+select* from departments;
+
+select * from faculty order by faculty_id;
+
+select *from marksheet order by roll_no;
+
+select * from mentor;
+
+select *from students_backup;
+
+select* from students_information order by roll_no;
+
+
+--Function
+--1
+select change_club_id(102,2,1);
+
+--2
+select search_students_by_city('Delhi');
+
+
+--Procedures
+--1
+
+call change_course_credit('java',4);
+
+--2
+
+call change_enrollment_no(101,'11111111111');
+
+--3
+
+call change_faculty_phoneno(201,1234567890)
+
+
+--4
+
+call get_department(1);
+
+--5
+
+call insert_club(12,'ValoRant','Here We play game');
+
+
+--View
+--1
+
+select* from failed_students;
+
+
+--2
+
+select * from star_batch;
+
+
+--  List Students with No Club Memberships Using a Subquery:
+
+SELECT firstname, lastname
+FROM students_information
+WHERE roll_no NOT IN (
+    SELECT roll_no
+    FROM club_membership
+);
+
+
+
+
+--  Calculate Average Marks for Students in a Specific Department Using a Subquery:
+
+SELECT department_name, AVG(total_marks) AS average_marks
+FROM marksheet
+WHERE department_name = 'CEA'
+GROUP BY department_name;
+
+
+-- Find Students with the Highest Marks Using a Subquery:
+
+SELECT si.firstname, si.lastname, m.total_marks
+FROM students_information si
+INNER JOIN marksheet m ON si.roll_no = m.roll_no
+WHERE m.total_marks = (
+    SELECT MAX(total_marks)
+    FROM marksheet
+);
+
+
+
+-- List Faculty and Their Associated Department Names using INNER JOIN:
+
+SELECT f.faculty_name, d.department_name
+FROM faculty f
+INNER JOIN departments d ON f.department_name = d.department_name;
+
+
+--  List Students and Their Department Names using INNER JOIN:
+
+SELECT si.firstname, si.lastname, d.department_name
+FROM students_information si
+INNER JOIN departments d ON si.department_name = d.department_name;
+
+
+
+-- List Clubs with Most Members:
+
+SELECT c.club_name, COUNT(cm.roll_no) AS member_count
+FROM clubs_organization c
+LEFT JOIN club_membership cm ON c.club_id = cm.club_id
+GROUP BY c.club_name
+ORDER BY member_count DESC;
+
+
+-- List Students by Age Range:
+
+SELECT firstname, lastname, student_age
+FROM students_information
+WHERE student_age BETWEEN 15 AND 18;
+
+
+
+--Give name and roll_no of student who are from 'Mumbai' city and have total marks>400
+select firstname,lastname,roll_no from students_information where student_city ='Mumbai' and roll_no in
+(select roll_no from marksheet where total_marks>400 );
+
+
+--Give name of Students who have taken part in 'Nritya' club;
+select firstname,lastname from students_information inner join club_membership on 
+club_membership.roll_no=students_information.roll_no inner join clubs_organization on 
+club_membership.club_id=clubs_organization.club_id where club_name='Nritya';
+
+
+
+--give name of students taht took part in more than 1 club
+select students_information.roll_no, students_information.firstname, students_information.lastname, COUNT(students_information.roll_no) 
+as club_count
+from students_information
+INNER JOIN club_membership ON club_membership.roll_no = students_information.roll_no
+INNER JOIN clubs_organization ON club_membership.club_id = clubs_organization.club_id
+group by students_information.roll_no, students_information.firstname, students_information.lastname
+having count(students_information.roll_no) > 1;
+
+
+--give roll no of students those who are part of more than 1 club
+SELECT roll_no, COUNT(*) AS club_count
+FROM club_membership
+GROUP BY roll_no
+HAVING COUNT(*) > 1;
+
+
+
+--query : give details of student who has total marks more than  400 but is not in starbatch
+select * from marksheet where total_marks>400 and roll_no not in(select roll_no from star_batch);
+
+
+------------------------------
+--  List Students with No Club Memberships Using a Subquery:
+
+SELECT firstname, lastname
+FROM students_information
+WHERE roll_no NOT IN (
+    SELECT roll_no
+    FROM club_membership
+);
+
+--  Calculate Average Marks for Students in a Specific Department Using a Subquery:
+
+SELECT department_name, AVG(total_marks) AS average_marks
+FROM marksheet
+WHERE department_name = '<department_name>'
+GROUP BY department_name;
+
+-- Find Courses with More Than a Certain Number of Students Using a Subquery:
+
+SELECT course_name
+FROM courses
+WHERE course_shortname IN (
+    SELECT course_shortname
+    FROM marksheet
+    GROUP BY course_shortname
+    HAVING COUNT(roll_no) > <minimum_student_count>
+);
+
+-- Find Students with the Highest Marks Using a Subquery:
+
+SELECT si.firstname, si.lastname, m.total_marks
+FROM students_information si
+INNER JOIN marksheet m ON si.roll_no = m.roll_no
+WHERE m.total_marks = (
+    SELECT MAX(total_marks)
+    FROM marksheet
+);
+
+-- List Faculty and Their Associated Department Names using INNER JOIN:
+
+SELECT f.faculty_name, d.department_name
+FROM faculty f
+INNER JOIN departments d ON f.department_name = d.department_name;
+
+--  List Students and Their Department Names using INNER JOIN:
+
+SELECT si.firstname, si.lastname, d.department_name
+FROM students_information si
+INNER JOIN departments d ON si.department_name = d.department_name;
+
+-- List Clubs with Most Members:
+
+SELECT c.club_name, COUNT(cm.roll_no) AS member_count
+FROM clubs_organization c
+LEFT JOIN club_membership cm ON c.club_id = cm.club_id
+GROUP BY c.club_name
+ORDER BY member_count DESC;
+
+-- List Students by Age Range:
+
+SELECT firstname, lastname, student_age
+FROM students_information
+WHERE student_age BETWEEN <min_age> AND <max_age>;
+
+--Query 
+--Give name and roll_no of student who are from 'Mumbai' city and have total marks>400
+select firstname,lastname,roll_no from students_information where student_city ='Mumbai' and roll_no in
+(select roll_no from marksheet where total_marks>400 );
+
+--Query
+--Give name of Students who have taken part in 'Nritya' club;
+select firstname,lastname from students_information inner join club_membership on 
+club_membership.roll_no=students_information.roll_no inner join clubs_organization on 
+club_membership.club_id=clubs_organization.club_id where club_name='Nritya';
+
+--give name of students taht took part in more than 1 club
+select students_information.roll_no, students_information.firstname, students_information.lastname, COUNT(students_information.roll_no) 
+as club_count
+from students_information
+INNER JOIN club_membership ON club_membership.roll_no = students_information.roll_no
+INNER JOIN clubs_organization ON club_membership.club_id = clubs_organization.club_id
+group by students_information.roll_no, students_information.firstname, students_information.lastname
+having count(students_information.roll_no) > 1;
+
+
+--give roll no of students those who are part of more than 1 club
+SELECT roll_no, COUNT(*) AS club_count
+FROM club_membership
+GROUP BY roll_no
+HAVING COUNT(*) > 1;
+
+--query : give details of student who has total marks more than  400 but is not in starbatch
+select * from marksheet where total_marks>400 and roll_no not in(select roll_no from star_batch);
